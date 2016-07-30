@@ -25,10 +25,10 @@
 \usepackage{multirow}
 
 \usepackage{url}
-\urldef{\mailsa}\path|{alfred.hofmann, ursula.barth, ingrid.haas, frank.holzwarth,|
-\urldef{\mailsb}\path|anna.kramer, leonie.kunz, christine.reiss, nicole.sator,|
-\urldef{\mailsc}\path|erika.siebert-cole, peter.strasser, lncs}@springer.com|    
+\urldef{\mailgmail}\path|{meeya.yx}@gmail.com|
 \newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\newcommand{\para}[1]{\vspace{0.05cm}\noindent\textbf{#1}}
+\newcommand{\vpara}[1]{\vspace{0.05cm}\noindent\textit{#1}}
 \noindent\keywordname\enspace\ignorespaces#1}
 
 %%% windows 注释这里  %%%
@@ -54,20 +54,17 @@
 % their surnames. This ensures that the names appear correctly in
 % the running heads and the author index.
 %
-\author{Li Mingyang%
-\and }
+\author{Li Mingyang$^\dag$ }
 
-\authorrunning{Lecture Notes in Computer Science: Authors' Instructions}
+\authorrunning{Mingyang Li et.al}
 % (feature abused for this document to repeat the title also on left hand pages)
 
 % the affiliations are given next; don't give your e-mail address
 % unless you accept that it will be published
-\institute{Springer-Verlag, Computer Science Editorial,\\
-Tiergartenstr. 17, 69121 Heidelberg, Germany\\
-\mailsa\\
-\mailsb\\
-\mailsc\\
-\url{http://www.springer.com/lncs}}
+\institute{$^\dag$ Department of Computer Science and Technology,\\
+Tsinghua University, Beijing 100084, China\\
+\mailgmail\\
+}
 
 %
 % NB: a more complex sample for affiliations and the mapping to the
@@ -76,8 +73,8 @@ Tiergartenstr. 17, 69121 Heidelberg, Germany\\
 % "llncs.dem" accompanies the document class "llncs.cls".
 %
 
-\toctitle{Lecture Notes in Computer Science}
-\tocauthor{Authors' Instructions}
+%\toctitle{Lecture Notes in Computer Science}
+%\tocauthor{Authors' Instructions}
 \maketitle
 
 \begin{abstract}
@@ -86,19 +83,18 @@ As Semantic Web develops, monolingual knowledge base cannot follow the growing r
 Ontology Building and Mapping are crucial to construct a CLKB. As the most important elements in Ontology, Concept and Property take up the job of describing instances. In a concept domain, property set comprises the description template of instances. How to define the concept-property and take advantage of them? How to align the cross-lingual concept-properties? All are problems remain to be solved when building CLKB.
 
 To solve the imbalance between Chinese and English knowledge quantity, a large-scale Chinese online wiki is imported, and a cross-lingual property matching framework based on heterogeneous wikis is proposed. The framework includes four steps. Firstly, it presents a method to generate concepts and properties. Secondly, it aligns properties in monolingual wikis and merges synonymous properties. Thirdly, cross-lingual seeds of high quality are generated for the later alignment. At Last, a binary classifier based on textual, semantic and popular features is trained for cross-lingual alignment prediction and new cross-links discovery.
-\keywords{Property Matching, }
+\keywords{Property Matching, Template, Knowledge Base}
 \end{abstract}
 
-
 \section{Introduction}
-Wikipedia is the largest knowledge store in the world. Nowadays it supports 228 languages. However, because of language popularity and regional difference, English articles and infoboxes are much more than those in other languages, which leads to quantity imbalance among various languages. Take English and Chinese Wikipedia as an example in Figure\ref{fig:en-zh-article-infobox-compare}. Until Feb. 2016, the number of English article is 6 times as much as Chinese. Meanwhile, English article with infobox is 8 times more than Chinese. It's significant to find out more cross-lingual relationships for global knowledge shareing.
+Wikipedia is the largest knowledge store in the world. Nowadays it supports 228 languages. However, because of language popularity and regional difference, English articles and infoboxes are much more than those in other languages, which leads to quantity imbalance among various languages. According To statistics, until Feb. 2016, the number of English article is 6 times as much as Chinese. Meanwhile, English article with infobox is 8 times more than Chinese. It's significant to find out more cross-lingual relationships for global knowledge shareing.
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.6\columnwidth]{fig/en-zh-article-infobox-compare}
-  \caption{Quantity Comparison between English and Chinese Article.}
-  \label{fig:en-zh-article-infobox-compare}
-\end{figure}
+%\begin{figure}[h]
+%  \centering
+%  \includegraphics[width=0.6\columnwidth]{fig/en-zh-article-infobox-compare}
+%  \caption{Quantity Comparison between English and Chinese Article.}
+%  \label{fig:en-zh-article-infobox-compare}
+%\end{figure}
 
 Cross-lingual links play an important role when building multi-language knowledge base. Wikipedia lan-links, which bridge the categories and articles among different language versions, can help connect concepts and instances in knowledge base. Unfortunately, Wikipedia maintains no obvious cross-lingual links for properties, which usually extracted from infobox attributes in articles. Such situation makes generating property mapping directly impossible.
 
@@ -123,7 +119,7 @@ In conclusion, our contributions are as follows:
 \end{itemize}
 
 \section{Preliminaries}
-We aim to solve the problem of cross-lingual property matching among Wikipedias(include Chinese Wikipeida $W_z$ and English Wikipedia $W_e$) and BaiduBaike($W_b$). Figure\ref{fig:frozen-infobox} gives the contents of movie \emph{Frozen} infobox in the three wikis. We try to map the properties $p_e$ and $p_z$ in articles ($a_e$ and $a_z$) which present the same entity in the world. For example, \emph{Starring} to \emph{主演}, \emph{Directed by} to \emph{导演}.
+We aim to solve the problem of cross-lingual property matching among Chinese Wikipeida $W_z$, English Wikipedia $W_e$ and BaiduBaike($W_b$). Figure\ref{fig:frozen-infobox} gives the contents of movie \emph{Frozen} infobox in the three wikis. We try to map the properties $p_e$ and $p_z$ in articles ($a_e$ and $a_z$) which present the same entity in the world. For example, \emph{Starring} to \emph{主演}, \emph{Directed by} to \emph{导演}.
 
 Although properties with same label may express different meaning, a property in a specific domain is unambiguous. We constrain a property definition with domain concept. Given a concept $c \in C$, we have property set(Template) $P^c=\{p^c_1,...p^c_n\}$. Each $c$ contains an article set$A_c$, $p_c$ only describes $a_c \in A_c$. To a specific $p_c$, articles using $p_c$ comprise $A^{p_c}$, and $A^{p_c} \subseteq A^c$. Moreover, an article $a^{p_c} \in A^{p_c}$ described by $p_c$ maintains the value for $p_c$, named $a^{p_c}.v$.
 
@@ -151,106 +147,93 @@ To solve the above problems and retain integrity of property set in domain, we p
 
 Figure\ref{fig:property-matching} shows the work flow of the Property-Matching Framework. Our work can be divided into four modules, respectively：
 
-\paragraph{Template Generation for BaiduBaike}
-To address the problem of no infobox template in BaiduBaike, we propose template generation model based on the frequency of use. We expect that given a specific concept, the model can fit a mapping virtual concept and related property set, which regarded as template. The property set of the concept can be guidance when composing an infobox. It also contains the candidates when matching properties, which helps descrease computation complexity.
+\textit{Template Generation for BaiduBaike}:
+To address the problem of no infobox template in BaiduBaike, we propose template generation model based on the frequency of use. The model is expected that given a specific concept, a mapping virtual concept and infobox template in BaiduBaike can be generated. The template of the concept can be guidance when composing an infobox. It also provides candidates when matching properties, which helps decrease computation complexity.
 
-\paragraph{Property Matching in Chinese}
-To solve the situation of polysemy, that is, properties with different render label may express the same meaning, we try to find out property synonyms with high quanlity by aligning Chinese Wikipedia and BaiduBaike. This step can help improve recall.
+\textit{Property Matching in Chinese}:
+To solve the polysemy problem, that is, properties with different render labels may express the same meaning, we try to find out property synonyms with high quanlity by aligning Chinese Wikipedia and BaiduBaike, which can also help improve recall.
 
-\paragraph{Cross-lingual Seed}
-There are no direct relationship between Wikipedia and BaiduBaike. However, make Chinese Wikipedia as bridge and utilize cross-lingual information in Wikipedia, we can extract some property alignment result with high precision.
+\textit{Cross-lingual Seed}:
+There are no direct relationships between Wikipedia and BaiduBaike. However, taking Chinese Wikipedia as bridge and utilizing cross-lingual information in Wikipedia, we can extract part of matching relationships with high precision.
 
-\paragraph{Cross-lingual Property Matching}
+\textit{Cross-lingual Property Matching}:
 For the left property, which is a long-tail problem, we train a binary classification model to judge whether a pair of English and Chinese properties is cross-lingual.
 
 \subsection{Template Generation for BaiduBaike}
-According to the affect of template, we assume that \emph{if a property  is used frequently in a specific domain while rarely appears in the other domain, then it is a typical property in this domain}. Thus, we apply TF-IDF(Term Frequency–Inverse Document Frequency) to indicate the improtance of a property in a concept.
+According to the effect of template, we assume that \emph{if a property is often used in a specific domain while rarely appears in the other domain, then it is a typical property in this domain}. Thus, we apply TF-IDF(Term Frequency–Inverse Document Frequency) to indicate the improtance of a property in a concept.
 
-How to define a concept and it relative elements? A template regular infoboxes of a type of articles. It associates a concept domain. Thus, we hav $T \approx C$。Now template in Wikipedia is known and this module task can be defined as:
+How to define a concept and it relative elements? A template regular infoboxes in a type of articles. It associates a concept domain. Thus, we have $T \approx C$. As template in Wikipedia is known and this module task can be defined as:
 \begin{definition}
-Given a concept(template) from $W_e$ $c_e \in C_E$，extract a virtual concept $c_z$ in $W_b$ and its property set $P^{c_z}=\{p_1^z,...,p_n^z\}$。
+Given a concept(template)$c_e$ from $W_e$, $c_e \in C_E$, extract a virtual concept $c_z$ in $W_b$ and its property set $P^{c_z}=\{p_1^z,...,p_n^z\}$。
 \end{definition}
-It is notice that, different from a $c_e$ contains a definite template, $c_z$ in $W_b$ is abstract. And $P^{c_z}$ can be known as instance characteristic in $c_z$ and compose template of $c_z$.
+It is notice that, different from $c_e$, which contains a definite template, $c_z$ in $W_b$ is abstract. And $P^{c_z}$ can be known as instance characteristic in $c_z$ and compose template of $c_z$.
 
-What properties belong to $c_z$？Firstly, we aquire candidates of $P^{c_z}$。Based on the schema of $W_b$, we can find out close relationship properties through directed association and at the same time extend property candidates by utilizing indirect association.
+What properties belong to $c_z$? Firstly, we aquire candidates of $P^{c_z}$. Based on the schema of $W_b$, we can find out close relationship properties through directed association and at the same time extend property candidates by utilizing indirect association.
 
-\paragraph{ Directed Association } Properties used in cross-lingual articles $A_z$, which are mapping articles in $c_e$, $A^{c_e}$, are regarded as properties directed associated with $c_e$. They are defined as $p_{direct}$；
+\paragraph{ Directed Association } Properties used in cross-lingual articles $A_z$, which map articles $A^{c_e}$ in $c_e$, are regarded as directed associated with $c_e$. They are defined as $p_{direct}$.
 
-\paragraph {Indirected Association} Properties used in articles ${A^z}'$ under $Ca^{z}$, which is cross-lingual category set of $Ca^{c_e}$ related with articles $A^{c_e}$, are regarded as indirected associated properties, defined as $p_{indirect}$. Considering the incorrectness in Wikipedia Taxonomy, we filter $Ca$ to prevent the unrelative categories by the following method:
+\paragraph {Indirected Association} Properties used in articles ${A^z}'$ under $Ca^{z}$, which is corresponding category set of $Ca^{c_e}$ related with articles $A^{c_e}$, are regarded as indirected associated properties and defined as $p_{indirect}$. Considering the incorrectness in Wikipedia Taxonomy, we filter $Ca$ to prevent the unrelative categories by merely taking the top $k(k=10)$ $Ca$s which contain the most articles(at least 2 articles):
 
 \begin{equation}
 Ca^{c_e} = Top_k\{ ca_i\mid |A^{ca}_i)| > 2 \}
 \end{equation}
-We only take the top $k(k=10)$ $Ca$ which contain the most articles(at least 2 articles). 
 
-Then, we meature a property's importance in a concept through calculating TF-IDF. TF is defined as:
-%\begin{align}
+Importanc of a property in a concept is measured through calculating TF-IDF, where TF is defined as:
 \begin{equation}
 \label{equ:tf}
 tf_{i,j}=\frac{n_{i,j}}{\sum_{k}{n_{k,j}}}
 \end{equation}
-%\end{align}
 
-In \ref{equ:tf}, $n_{i,j}$ is the frequency a property used in concept $c_{j}$, while denominator is the sum of frequency of all the properties used in concept $c_{j}$. Because $p_{direct}$ is more important than $p_{indirect}$, we have:
+In \ref{equ:tf}, $n_{i,j}$ is the frequency a property used in concept $c_{j}$, while denominator is the sum of frequency of all the properties used in concept $c_{j}$. Because $p_{direct}$ is more typical than $p_{indirect}$, we have:
 
-%\begin{align}
 \begin{equation}
 n_{i,j} = {\sum_{k}{x_{k,j}}}
-%\end{align}
 \end{equation}
-
-\begin{equation}
-%\begin{align}
-x_{k,j} =
-\left\{\begin{matrix}
-2 \& p_i = p_{direct} \ in \ c_j\\
-1 \& p_i = p_{indirect} \ in \ c_j\\
-0 \& p_i \ not \ in \ c_j
-\end{matrix}\right.
-%\end{align}
-\end{equation}
+where $x_{k,j}$ is 2 if it's $p_{indirect}$ in $c_j$ and 1 if it's $p_{direct}$.
 
 \subsection{Property Matching in Chinese}
 \label{sec:similar-property}
-Taking Chinese Wikipedia as a bridge to connect English Wikipedia and BaiduBaike, our first task is to find out property matching in the two Chinese wikis. This task solves two little issues. One is finding mapping properties in heterogeneous wikis, the other is searching different expressions of a specific property.
+Taking Chinese Wikipedia as a bridge to connect English Wikipedia and BaiduBaike, our first task is to match properties in the two Chinese wikis, $W_z$ and $W_b$. This task solves two little issues. One is finding mapping properties in heterogeneous wikis, the other is acquring different expressions of a specific property.
 
-To find alignment in two wikis, we employ multi-strategies. Specifically:
+To find alignment in two wikis, we employ multi-strategies. Specifically,
 \begin{enumerate}[1]
-\item Based on Property Label: In infoboxes of two articles which describe the same entity but are from two wikis, the two properties having the same label are thought of the same property. 
-\item Based on Same Property Value: In infoboxes of two articles which describe the same entity but are from two wikis, if two property labels have the same character and their values are same in at least $N(N=2)$ infoboxes, they are thought of the same property. 
-\item Based on Similar Property Value: If the values of two properties are similar and the frequency of same situation is more than $M(M=5)$, then the two are thought of the same property.
+\item Based on Property Label: In infoboxes from articles $\left<a_(W_z), a_(W_b)\right>$, which describe the same entity, the two properties having the same label are considered as the same property. 
+\item Based on Same Property Value: In infoboxes of articles $\left<a_(W_z), a_(W_b)\right>$, if two property labels have same characters and their values are same in at least $N(N=2)$ infoboxes, they are considered as the same property. 
+\item Based on Similar Property Value: If the values of two properties are similar and such situation occurs more than $M(M=5)$ times, then the two properties are considered as same.
 \end{enumerate}
 
-Because of the difference of editation habit or free rule in wikis, a property may have several expression labels. After observing alignment result, we find that a property in Chinese Wikipedia may mapping to multiple property labels in BaiduBaike. For example, in film concept, \textit{剪辑} has three expressions, which are \textit{剪辑}, \textit{剪辑导演} and \textit{剪接}.
+%Because of the difference of editation habit or free rule in wikis, a property may have several expression labels. 
+However, after alignment, we find that sometimes a property in Chinese Wikipedia maps to multiple property labels in BaiduBaike. For example, in film concept, \textit{剪辑} has three expressions, which are \textit{剪辑}, \textit{剪辑导演} and \textit{剪接}.
 
 We merge properties with the same meaning but different labels into a \textit{Super Property} $sp=\{p_1,...,p_n\}$.
 
-In the research of similar property, cluster is a common method. By extracting features from text, property domain, structure and many other aspects, properties can be clustered. In ideal condition, a cluster presents a super property. We try to cluster each concept in BaiduBaike by DBSCAN with three aspects, text similarity, Word2Vec similarity and value similarity and evaluate \textit{film}, \textit{company}, \textit{single} mantually. Unfortunately, the result is not as good as we expected.
+In the research of similar property, cluster is a common method. By extracting features from text, property domain, structure and many other aspects, properties can be clustered. In ideal condition, a cluster presents a super property. We try to cluster each concept in BaiduBaike with three aspects, text similarity, Word2Vec similarity and value similarity and evaluate \textit{film}, \textit{company}, \textit{single} mantually. Unfortunately, the result is not as good as we expected.
 
-As super properties are the input of the latter process, a little defect may lead to error accumulation. Thus, high quality is required. We take advantage of the alignment result in the two Chinese wikis to ensure high quality in the further work.
+As super properties are the input of the latter module, to prevent error accumulation, we take advantage of the ambiguity expression from alignment result in the two Chinese wikis to ensure high quality in the further work.
 
 \subsection{Cross-lingual Seed}
-We employ indirect alignment method to search an initial batch of cross-lingual mapping properties. Specifically, based on the characteristic of cross-lingual in Wikipedia, we can extract Chinese and English property relationship. Then we take the result as medium to mine alignment between English Wikipedia and BaiduBaike. The whole procedure can be divided into three parts, which are finding mapping relationship in $W_e$ and $W_z$, $W_z$ and $W_b$, $W_e$ and $W_b$ respectively. Among them, the second part is finished in section\ref{sec:similar-property}.
+We employ indirect alignment method to generate the first batch of cross-lingual matching properties. Specifically, based on the existing cross-lingual information in Wikipedia, we can extract Chinese and English property relationships. Then we take the result as medium to mine alignment between $W_e$ and BaiduBaike. The whole procedure can be divided into three parts, which are finding mapping relationship in $W_e$ and $W_z$, $W_z$ and $W_b$, $W_e$ and $W_b$ respectively. Among them, the second part is done in section\ref{sec:similar-property}.
 
-\paragraph{Alignment between $W_e$ and $W_z$} is implemented based on Wikipedia lan-links, that is, existed cross-lingual templates and articles. Figure\ref{fig:cross-lingual-seed} shows three situations specifically.
+\paragraph{Alignment between $W_e$ and $W_z$} is implemented based on Wikipedia lan-links, that is, cross-lingual templates and articles. Three situations are considered.
 
-\begin{figure}[h]
-  \centering
-    \includegraphics[height=4cm]{fig/cross-lingual-seed}
-  \caption{中英文维基属性跨语言抽取说明}
-  \label{fig:cross-lingual-seed}
-\end{figure}
+%Figure\ref{fig:cross-lingual-seed} shows three situations specifically.
+%\begin{figure}[h]
+%  \centering
+%    \includegraphics[height=4cm]{fig/cross-lingual-seed}
+%  \caption{中英文维基属性跨语言抽取说明}
+%  \label{fig:cross-lingual-seed}
+%\end{figure}
 
 \begin{enumerate}[1)]
-    \item Based on Cross-linked Template: Given two cross-linked templates, $\left<T_e, T_z\right>$, find the display labels mapping to the same template label. That is, if $p_e(T_e).tl_e == p_z(T_z).tl_z$, $\left<p_e(T_e), p_z(T_z)\right>$ are cross-lingual properties.
-    \item Based on Cross-linked Article: Given two cross-linked articles, $\left<a_e, a_z\right>$, and their infobox templates, $\left<T_e'(a_e), T_z'(a_z)\right>$, if $p_e(T_e').tl_e == p_z(T_z').tl_z$, $\left<p_e(T_e'), p_z(T_z')\right>$ are cross-lingual properties.
+    \item Based on Cross-linked Template: Given two cross-linked templates, $\left<T_e, T_z\right>$, find the display labels mapping to the same template label. That is, if $p_e(T_e).tl_e$ equals to $p_z(T_z).tl_z$, $\left<p_e(T_e), p_z(T_z)\right>$ are cross-lingual properties.
+    \item Based on Cross-linked Article: Given two cross-linked articles, $\left<a_e, a_z\right>$, and their infobox templates, $\left<T_e'(a_e), T_z'(a_z)\right>$, if $p_e(T_e').tl_e$ equals to $p_z(T_z').tl_z$, $\left<p_e(T_e'), p_z(T_z')\right>$ are cross-lingual properties.
     \item Based on Value: Given two cross-linked articles $\left<a_e, a_z\right>$, if their values, $\left<a_e(p_e).v, a_z(p_z).v\right>$ are object properties and refer to the same entity, $\left<p_e, p_z\right>$ are cross-linked.
 \end{enumerate}
 
 \paragraph{ Alignment between $W_e$ and $W_b$} is divided into two steps.
 \begin{enumerate}[1)]
-\item Aligning in Article, which is taking the previous result as media and aligning properties in $W_e$ and $W_b$. As the previous result is limited by the number of aligned articles, there is still scaling possibility in concept.
-\item Aligning in Concept, that is, given a pair of aligned English-Chinese property in Wikipedia in concept $c_w$, if in the mapping concept $c_b$, which can be acheived from subsection \ref{sec:domain-template}, there is a Baidu property label equaling to a Chinese Wikipedia property label, then the three property present the same property.
+\item Aligning in Articles, which is taking the previous result as medium and aligning properties in $W_e$ and $W_b$. As the previous result is limited by the number of aligned articles, there is still scaling possibility in concept.
+\item Aligning in Concepts, that is, given a pair of aligned English-Chinese property in Wikipedia in concept $c_w$, if in the mapping $W_b$ concept $c_b$, which can be acheived from subsection \ref{sec:domain-template}, there is a $p_{c_b}$'s label equaling to the label of a $p_{c_w}$, then the three property present the same.
 \end{enumerate}
 
 \subsection{Cross-lingual Property Matching}
@@ -279,7 +262,7 @@ sim_{label}(p_e, p_z) = ed\_sim(label'(p_e), label(p_z))
 \end{equation}
 $label'$ is the translated string.
 
-\paragraph{Value Similarity} Property value is the most 可信的 standard for measuring if two properties are mapped. If two properties in aligned articles have the same value, the possibility of alignment is large. The value is divided into three types according to its content, respectively article, numeric, and text. 
+\paragraph{Value Similarity} Property value is the most reliable standard for measuring if two properties are mapping. If two properties in aligning articles have the same value, the possibility of matching is large. The value is divided into three types according to its content, respectively article, numeric, and text. 
 
 \textit{Article Value} is a value links to an article. Article values are equal if they point to the same entity. Similarity function is in Formula \ref{equ:article_value_similarity}
 \begin{equation}
@@ -295,7 +278,7 @@ sim_{article\_v}(p_e, p_z) = \frac{\sum_{a_e\in A^{p_e}, a_z \in A^{p_z}} Equal(
 \end{equation}
 $CL$ is existed cross-lingual links，$A(p)\cap CL$ is the articles which contain cross-lingual link.
 
-\textit{Numeric Value} is the value constracted by numbers, such as age, date or film boxing. Numeric values are focused on number comparation. We extract numbers by regexxxxx, and calculate Jaccard Similarity in Formala \ref{equ:number_value_similarity}。
+\textit{Numeric Value} is the value constracted by numbers, such as age, date or film boxing. Numeric values are focused on number comparation. We extract numbers by regular expression, and calculate Jaccard Similarity in Formula \ref{equ:number_value_similarity}。
 \begin{equation}
 sim_{number}(s1, s2) = \frac { |digit(s1) \cap digit(s2)| }{ |digit(s1) \cup digit(s2)| }
 \end{equation}
@@ -305,7 +288,7 @@ sim_{number}(s1, s2) = \frac { |digit(s1) \cap digit(s2)| }{ |digit(s1) \cup dig
 sim_{number\_v}(p_e, p_z) = \frac{\sum_{a_e\in A^{p_e}, a_z \in A^{p_z}} sim_{number}(a_e^{p_e}.v, a_z^{p_z}.v)}{min(\left| A^{p_e}\cap CL \right|, \left|A^{p_z} \cap CL) \right|)}
 \end{equation}
 
-$digit(s)$ is the numbers in string $s$。
+$digit(s)$ is the numbers extracted from string $s$。
 
 \textit{Textual Value} is neither article value nor numeric value. Their similarity are calculate by edit distance in Formula \ref{equ:literal_value_similarity}
 \begin{equation}
@@ -314,7 +297,7 @@ sim_{literal\_v}(p_e, p_z) = \frac { \sum _{ { a }_{ e }\in { A }^{p_e },{ a }_{
 \end{equation}
 $a_e, a_z$ are short for $a_e^{p_e}, a_z^{p_z}$，which represent articles contain property $p$. $A_e, A_z$ are short for $A_e^{p_e},A_z^{p_z}$ and represent articles using property $p$.
 
-To decrease complex when calculating, we set the 粒度 as article, that is only compare values in aligned article infobox.
+To decrease complex when calculating, we set the scope as article, that is only comparing values in aligned article infobox.
 
 \paragraph{Structual Feature}
 Many current knowledge base are build on online Wikis. Wikis contain semantic relationship such as \textit{subClassOf} between classes and subclasses, \textit{instanceOf} between entities and classes. Semantic information can be used to generate structual features\cite{wang2014cross}. Based on semantic relationships, we extract two features, respectively article similarity $sim_{article}$ in Formula\ref{equ:sim-article} and category similarity $sim_{category}$ in Formula\ref{equ:sim-category}. We use NGD(Normalized Google Distance) to calculate.
@@ -331,7 +314,7 @@ sim_{category}(p_e, p_z) = \frac{\max\{\log |Ca_e|, \log |Ca_z|\} - \log|Ca_e \c
 $A_e, A_z$ are short for $A_e^{p_e},A_z^{p_z}$ which represent articles using property $p$. $Ca_e, Ca_z$ are short for $Ca_e^{p_e}, Ca_z^{p_z}$ and represent categories related with property $p$.
 
 \paragraph{Distributive Features}
-is based on 假设 that \textit{The frequency of a specific property is similar even in different wikis.} We call the characteristic as \textit{Popular} which defined in Formula \ref{equ:sim-popular}.
+is based on assumption that \textit{the frequency of a specific property is similar even in different wikis.} We call the characteristic as \textit{Popular} which defined in Formula \ref{equ:sim-popular}.
 \begin{equation}
 \label{equ:sim-popular}
 sim_{popular}(p_e, p_z) = abs(\frac{|A^{p_e}|}{|A^{C_e}|} - \frac{|A^{p_z}|}{|A^{C_z}|})
@@ -339,27 +322,29 @@ sim_{popular}(p_e, p_z) = abs(\frac{|A^{p_e}|}{|A^{C_e}|} - \frac{|A^{p_z}|}{|A^
 
 \section{Experiment}
 \subsection{Result for BaiduBaike Template}
-Finally we abstract 840 aligned concept domain between English Wikipedia and BaiduBaike, and extract property sets of these domains. The property sets contain domain-related popular properties and can be regarded as candidates of domain template. To ensure the accuracy of template, we set TF-IDF threshold(0.01) to filter important properties. So that 36699 concept properties are aquired and each template 分配了 43.7 properties averagely. Table\ref{tab:baidu-template-stat} provides concepts with most properties. Table\ref{tab:baidu-template-examples} gives property sets of two common concept.
+Finally we abstract 840 aligned concept domain between English Wikipedia and BaiduBaike, and extract property sets of these domains. The property sets contain domain-related popular properties and can be regarded as candidates of domain template. To ensure the accuracy of template, we set TF-IDF threshold(0.01) to filter important properties. So that 36699 concept properties are aquired and each template shares 43.7 properties averagely. 
+%Table\ref{tab:baidu-template-stat} provides concepts with most properties. 
+Table \ref{tab:baidu-template-examples} gives property sets of two common concept.
 
-\begin{table}[htb]
-  \centering
-  \caption{Result of Concept Template Generation in BaiduBaike(Top 5)}
-  \label{tab:baidu-template-stat}
-    \begin{tabular}{lcl}
-         Concept & \#Property & Examples\\ 
-         software      & 301  &  中文名/开发商/发行商/软件类型\\
-         protein       & 278  & 中文名/作用/别称/分子量       \\
-         building      & 285  & 中文名/地理位置/高度/位置     \\
-         postage stamp & 286  & 中文名/全套枚数/书名/发行日期 \\
-         mythical creature  & 259 & 中文名/出处/类型/攻击方式 \\
-    \end{tabular}
-\end{table}
+%\begin{table}[htb]
+%  \centering
+%  \caption{Result of Concept Template Generation in BaiduBaike(Top 5)}
+%  \label{tab:baidu-template-stat}
+%    \begin{tabular}{lcl}
+%         Concept & \#Property & Examples\\ 
+%         software      & 301  &  中文名/开发商/发行商/软件类型\\
+%         protein       & 278  & 中文名/作用/别称/分子量       \\
+%         building      & 285  & 中文名/地理位置/高度/位置     \\
+%         postage stamp & 286  & 中文名/全套枚数/书名/发行日期 \\
+%         mythical creature  & 259 & 中文名/出处/类型/攻击方式 \\
+%    \end{tabular}
+%\end{table}
 
 \begin{table}[htb]
   \centering
   \caption{Examples of Common Concept Template in BaiduBaike(Top 20)}
   \label{tab:baidu-template-examples}
-    \begin{tabular}{cccc}
+    \begin{tabular}{llll}
          \multicolumn{2}{c}{Planet} & \multicolumn{2}{c}{电影信息框}\\ 
          发现者   &  自转周期  & 导演     & 其他译名 \\
          发现时间 &  离心率    & 制片地区 & 外文名   \\
@@ -381,8 +366,8 @@ Table\ref{tab:zhwiki-baidu-cross-lingual} gives alignment number and examples of
   \centering
   \caption{Alignment statistics and examples of $W_z$ and $W_b$}
   \label{tab:zhwiki-baidu-cross-lingual}
-    \begin{tabular}{ccc}
-      {\emph{Strategy}} & {\emph{Number}} &  {\emph{Examples}} \\
+    \begin{tabular}{lcl}
+      {Strategy} & {Number} &  {Examples} \\
       Based on Property Label & 2324 & Infobox Game \  发行商  \ 发行商  \\
       Based on Same Property Value & 935  & Infobox Game \  适用年龄 \   年龄 \\
       Based on Similar Property Value & 3269 & Infobox scientist \ 获奖 \   主要成就  \\
@@ -397,7 +382,7 @@ We achieve alignment result based on cross-lingual templates in 2016.02 Chinese 
   \centering
   \caption{Cross-lingual Result between $W_e$ and $W_z$}
   \label{tab:zhwiki-enwiki-cross-lingual}
-    \begin{tabular}{ccl}
+    \begin{tabular}{lcl}
       {Strategy} & {Number} &  {Examples} \\
       Based on Cross-linked Template & 16104 & Editing by  剪辑/ Date(s) 日期   \\
       Based on Cross-linked Article & 124   & memory 记忆体 / manufacturer 制造商\\
@@ -410,7 +395,7 @@ We achieve alignment result based on cross-lingual templates in 2016.02 Chinese 
   \centering
   \caption{Cross-lingual Seed between $W_e$ and $W_b$}
   \label{tab:cross-lingual-seed}
-    \begin{tabular}{ccc}
+    \begin{tabular}{lcc}
       {Strategy} & {Property Number} & {Concept Number} \\
       Align in Article & 2262  & 235 \\
       Align in Concept & 673   & 180 \\
@@ -423,7 +408,7 @@ We achieve alignment result based on cross-lingual templates in 2016.02 Chinese 
   \caption{Cross-lingual Seed Examples}
   \label{tab:cross-lingual-seed-examples}
     \begin{tabular}{cll}
-      {Concept} & {English Property} &  {Chinese Property} \\
+      {Concept} & \multicolumn{1}{c}{English Property} & \multicolumn{1}{c}{Chinese Property} \\
       \multirow{5}{*}{电影(Film)}
       & Box office     & 累计票房/全球票房/票房  \\
       & Budget         & 制片成本/预算/电影投资  \\
@@ -511,10 +496,24 @@ Besides, we show influence and comparation of different feature combination in T
     \end{tabular}
 \end{table}
 
+\section{Related Works}
+Property plays an important role when building knowledge base(KB). Properties in domain KB, such as Movie Ontology, are small quantity, so that manual check can handle\cite{wang:movie}. However, KBs generated from online wiki resources usually maintain abundant properties from infobox, which is worth deep research. 
+
+Our work involves \textit{Similar Property} and \textit{Property Matching}. The simplest way to find similar properties is comparing labels based on string similarity algorithm. Common algorithms include Cosine similarity, Jaccard Distance, Editing Distance. Some methods depond on existing knowledge resouces, such as WordNet\cite{yang2005measuring}, or context distribution\cite{pantel2009web}. Most works are in English. Chinese related works are less. Besides, characterastics of Chinese, such as no case-sensitive and no blank, make taskes based on Chinese Property harder. \cite{liu2014extracting} uses BaiduBaike dataset to calculate textual similarity, semantic similarity and context similarity, for getting similar Chinese Properties.
+
+Cross-lingual property matching aims to match infobox properties in different languages. The common idea is comparing property values under aligned articles' infoboxes. Analysis in alphabet languages is easier because string similarity can be calculated directly\cite{bouma2009cross}, which doesn't work between alphabet and Chinese. Making use of translation tool is a familiar method\cite{fu2009cross}. Dictionary composed of lan-links from Wikipedia can also help language-transition\cite{nguyen2011multilingual}.  
+
+Unsupervised method of predicting whether a pair is mapping usually employs similarity algorithm in aspects such as label text, link structure, co-occurrence, value range and select the most probable pairs\cite{nguyen2011multilingual, lin2011unsupervised}. Supervised method regards the problem as a binary classification model\cite{adar2009information}. Besides, finding more algining articles for extracting more property mapping pairs is also a common idea\cite{rinser2013cross}.
+
+Our work introduces Chinese BaideBaike to balance the quantity of knowledge in different languages, so that more alignment relationships can be mined. The work faces both cross-lingual and heterogeneous problems, which we attempt to solve by concept templates.
+
+
 \section{Conclusion}
-This paper tries to solve the problem of cross-lingual property matching in heterogeneous wikis. To achieve the goal, we purpose CLPM framework, which comprised by four modules, respectively, \textit{Template Generation for BaiduBaike}, \textit{Property Matching in Chinese}, \textit{Cross-lingual Seed}, \textit{Cross-lingual Property Matching}. Facing the problem of no template in BaiduBaike, we abstract concept and its property set mapping to specific Wikipedia Template and align the two wikis in template level. Then we utilize an alignment strategy to generate property mapping relations and multi-forms with high-precision cross wikis. Then taking Chinese Wikipedia as bridge, we extract accurate alignment result between EnglishWikipedia and BaiduBaike. Finally we train a binary classification based on texual, semantic and xxx features to extend alignment relations.
+This paper tries to solve the problem of cross-lingual property matching in heterogeneous wikis. To achieve the goal, we purpose CLPM framework, which comprised by four modules, respectively, \textit{Template Generation for BaiduBaike}, \textit{Property Matching in Chinese}, \textit{Cross-lingual Seed}, \textit{Cross-lingual Property Matching}. Facing the problem of no template in BaiduBaike, we abstract concept and its property set mapping to specific Wikipedia Template and align the two wikis in template level. Then we utilize an alignment strategy to generate property mapping relations and multi-forms with high-precision cross wikis. Then taking Chinese Wikipedia as bridge, we extract accurate alignment result between EnglishWikipedia and BaiduBaike. Finally we train a binary classification based on textual, semantic and distributive features to extend alignment relations.
 
-\section*{Acknowledgement}
+%\section*{Acknowledgement}
 
+\bibliographystyle{splncs03}
+\bibliography{paper}
 
 \end{document}
